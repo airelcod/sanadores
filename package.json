@@ -1,17 +1,12 @@
 {
-  "name": "sanadores",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "pg": "^8.22.0"
-  }
+    "name": "sanadores-backend",
+    "version": "1.0.0",
+    "description": "Backend serverless para gestión de pacientes",
+    "main": "api/pacientes.js",
+    "dependencies": {
+        "pg": "^8.11.3"
+    },
+    "devDependencies": {
+        "@vercel/node": "^3.0.0"
+    }
 }
