@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Pacientes · Sanadores</title>
+  <!-- Fuente profesional -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ----- RESET & BASE ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #eef2f7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1e2a3a;
+      padding: 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .dashboard {
+      max-width: 1320px;
+      width: 100%;
+    }
+
+    /* ----- TOP BAR ----- */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem 1.5rem;
+    }
+
+    .top-bar .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .top-bar .brand i {
+      font-size: 1.6rem;
+      color: #1d4a6e;
+    }
+
+    .top-bar .brand h1 {
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+      color: #0b263b;
+    }
+
+    .top-bar .brand .badge {
+      font-weight: 400;
+      font-size: 0.7rem;
+      background: #f0f4fa;
+      border: 1px solid #dce3ec;
+      padding: 0.15rem 0.9rem;
+      border-radius: 20px;
+      color: #2c4b68;
+      margin-left: 0.3rem;
+      letter-spacing: 0.02em;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .top-actions .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      padding: 0.1rem 0.1rem 0.1rem 0.8rem;
+      transition: border 0.12s, box-shadow 0.12s;
+    }
+
+    .top-actions .search-wrapper:focus-within {
+      border-color: #1d4f73;
+      box-shadow: 0 0 0 2px rgba(26, 76, 120, 0.06);
+    }
+
+    .top-actions .search-wrapper i {
+      color: #6b87a3;
+      font-size: 0.85rem;
+    }
+
+    .top-actions .search-wrapper input {
+      border: none;
+      padding: 0.5rem 0.5rem 0.5rem 0.3rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      background: transparent;
+      width: 180px;
+      color: #142433;
+    }
+
+    .top-actions .search-wrapper input:focus {
+      outline: none;
+    }
+
+    .top-actions .search-wrapper input::placeholder {
+      color: #94a9be;
+      font-weight: 400;
+    }
+
+    .btn-outline {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.8rem;
+      padding: 0.45rem 1.2rem;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      background: #ffffff;
+      color: #1d3e5c;
+      cursor: pointer;
+      transition: all 0.12s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-outline i {
+      font-size: 0.8rem;
+      color: #4d6b88;
+    }
+
+    .btn-outline:hover {
+      background: #f0f4fa;
+      border-color: #b0c0d2;
+    }
+
+    .btn-primary-sm {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.8rem;
+      padding: 0.45rem 1.4rem;
+      border: 1px solid #1d4a6e;
+      border-radius: 2px;
+      background: #1d4a6e;
+      color: white;
+      cursor: pointer;
+      transition: all 0.12s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary-sm i {
+      font-size: 0.8rem;
+    }
+
+    .btn-primary-sm:hover {
+      background: #133a59;
+      border-color: #133a59;
+    }
+
+    /* ----- MÉTRICAS ----- */
+    .metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      margin-bottom: 2.2rem;
+      background: #ffffff;
+      border: 1px solid #dce3ec;
+      border-radius: 2px;
+      padding: 1rem 2rem;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .metric-item i {
+      font-size: 1.2rem;
+      color: #1d4a6e;
+      width: 1.8rem;
+      text-align: center;
+    }
+
+    .metric-item .metric-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-item .metric-info .number {
+      font-weight: 600;
+      font-size: 1.2rem;
+      line-height: 1.3;
+      color: #0b263b;
+    }
+
+    .metric-item .metric-info .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #4b637c;
+    }
+
+    /* ----- TABLA / LISTADO ----- */
+    .table-wrapper {
+      background: #ffffff;
+      border: 1px solid #dce3ec;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 40px 1.2fr 1.2fr 1fr 1.2fr 1.2fr 0.9fr 0.9fr;
+      background: #f6f9fd;
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid #dce3ec;
+      font-weight: 500;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2c4058;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .table-header .sortable {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: default;
+    }
+
+    .table-header .sortable i {
+      font-size: 0.65rem;
+      color: #6b87a3;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 40px 1.2fr 1.2fr 1fr 1.2fr 1.2fr 0.9fr 0.9fr;
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid #e8eef5;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      transition: background 0.08s;
+    }
+
+    .table-row:hover {
+      background: #fafcfe;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .table-row .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 2px;
+      background: #e9eff7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 0.7rem;
+      color: #1d4a6e;
+      text-transform: uppercase;
+      border: 1px solid #d0dbe8;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .table-row .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .table-row .cell-name {
+      font-weight: 500;
+      color: #0b263b;
+    }
+
+    .table-row .cell-cedula {
+      color: #2c4058;
+      font-feature-settings: "tnum";
+    }
+
+    .table-row .cell-condicion {
+      font-size: 0.75rem;
+      background: #f0f4fa;
+      padding: 0.15rem 0.7rem;
+      border-radius: 20px;
+      display: inline-block;
+      border: 1px solid #dce3ec;
+      color: #1d3e5c;
+      white-space: nowrap;
+    }
+
+    .table-row .cell-fecha {
+      font-feature-settings: "tnum";
+      color: #2c4058;
+    }
+
+    .table-row .cell-telefono {
+      color: #2c4058;
+      font-feature-settings: "tnum";
+    }
+
+    .table-row .cell-acciones {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .table-row .cell-acciones a {
+      color: #4d6b88;
+      font-size: 0.85rem;
+      transition: color 0.1s;
+      text-decoration: none;
+    }
+
+    .table-row .cell-acciones a:hover {
+      color: #1d4a6e;
+    }
+
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.15rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid transparent;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .status-active {
+      background: #e3f0e8;
+      border-color: #b7d3c5;
+      color: #1b4f3a;
+    }
+
+    .status-pending {
+      background: #f5f0e3;
+      border-color: #dccdb0;
+      color: #6b5a3a;
+    }
+
+    .status-archived {
+      background: #eceff4;
+      border-color: #c9d2de;
+      color: #3d526b;
+    }
+
+    /* ----- FOOTER TABLA ----- */
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      background: #fafcfe;
+      border-top: 1px solid #dce3ec;
+      font-size: 0.8rem;
+      color: #2c4058;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .table-footer .pagination {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .table-footer .pagination a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.15rem 0.7rem;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      color: #1d3e5c;
+      text-decoration: none;
+      font-size: 0.8rem;
+      transition: all 0.1s;
+    }
+
+    .table-footer .pagination a:hover {
+      background: #f0f4fa;
+      border-color: #b0c0d2;
+    }
+
+    .table-footer .pagination a.active {
+      background: #1d4a6e;
+      border-color: #1d4a6e;
+      color: white;
+    }
+
+    .table-footer .info {
+      font-size: 0.75rem;
+      color: #4b637c;
+    }
+
+    /* ----- MODAL (REGISTRO) ----- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(2px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-overlay .modal-content {
+      max-width: 920px;
+      width: 100%;
+      max-height: 95vh;
+      overflow-y: auto;
+      transform: scale(0.96) translateY(12px);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    /* --- estilos del formulario --- */
+    .form-card {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.02);
+      padding: 2.4rem 2.6rem;
+      border: 1px solid #dce3ec;
+      transition: box-shadow 0.15s;
+    }
+
+    .form-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e2e9f2;
+      padding-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .form-header i {
+      font-size: 1.5rem;
+      color: #1e405e;
+      width: 2.2rem;
+      text-align: center;
+    }
+
+    .form-header h1 {
+      font-weight: 600;
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+      color: #0b263b;
+      margin: 0;
+    }
+
+    .form-header .subhead {
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: #4b637c;
+      margin-left: auto;
+      background: #f0f4fa;
+      padding: 0.2rem 1rem;
+      border-radius: 20px;
+      letter-spacing: 0.01em;
+      border: 1px solid #dbe2ec;
+    }
+
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      color: #4b637c;
+      cursor: pointer;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      transition: background 0.1s;
+      margin-left: auto;
+    }
+
+    .btn-close-modal:hover {
+      background: #f0f4fa;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6rem 2.2rem;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .field-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .field-group label {
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2c4058;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .field-group label i {
+      font-size: 0.8rem;
+      color: #4d6b88;
+      width: 1.2rem;
+    }
+
+    .field-group .hint {
+      font-weight: 400;
+      font-size: 0.65rem;
+      color: #5f788f;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 0.2rem;
+    }
+
+    .field-group input,
+    .field-group select,
+    .field-group textarea {
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      background: #fafcfe;
+      transition: border 0.12s ease, box-shadow 0.12s ease;
+      color: #142433;
+      font-weight: 400;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus {
+      outline: none;
+      border-color: #1d4f73;
+      box-shadow: 0 0 0 2px rgba(26, 76, 120, 0.06);
+      background: #ffffff;
+    }
+
+    .field-group input::placeholder,
+    .field-group textarea::placeholder {
+      color: #94a9be;
+      font-weight: 400;
+      font-size: 0.85rem;
+    }
+
+    .field-group textarea {
+      resize: vertical;
+      min-height: 70px;
+      border-radius: 2px;
+    }
+
+    .soporte-area {
+      background: #f6f9fd;
+      border-radius: 2px;
+      padding: 1.4rem 1.6rem 1.8rem;
+      margin-top: 0.4rem;
+      border: 1px solid #dee6f0;
+    }
+
+    .soporte-area .label-section {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #1a344d;
+      margin-bottom: 1.2rem;
+      border-bottom: 1px solid #dce4ef;
+      padding-bottom: 0.7rem;
+    }
+
+    .soporte-area .label-section i {
+      font-size: 1rem;
+      color: #2a567a;
+    }
+
+    .soporte-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.6rem 2.2rem;
+      align-items: flex-end;
+    }
+
+    .soporte-item {
+      flex: 1 0 170px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .soporte-item label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #2b4764;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .soporte-item label i {
+      font-size: 0.8rem;
+      color: #3b6382;
+    }
+
+    .file-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: white;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      padding: 0.1rem 0.1rem 0.1rem 0.7rem;
+      transition: border 0.12s;
+    }
+
+    .file-input-wrapper:focus-within {
+      border-color: #1d4f73;
+      box-shadow: 0 0 0 2px rgba(26, 76, 120, 0.06);
+    }
+
+    .file-input-wrapper input[type="file"] {
+      border: none;
+      padding: 0.4rem 0;
+      background: transparent;
+      font-size: 0.8rem;
+      color: #1a3a57;
+      flex: 1;
+      border-radius: 0;
+    }
+
+    .file-input-wrapper input[type="file"]::file-selector-button {
+      background: #e9eff7;
+      border: 1px solid #cbd6e3;
+      border-radius: 2px;
+      padding: 0.3rem 0.9rem;
+      font-weight: 500;
+      font-size: 0.7rem;
+      color: #1c3d5c;
+      margin-right: 0.6rem;
+      cursor: pointer;
+      transition: background 0.1s;
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .file-input-wrapper input[type="file"]::file-selector-button:hover {
+      background: #dce5f0;
+    }
+
+    .soporte-item .link-input {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #ccd7e4;
+      border-radius: 2px;
+      padding: 0.1rem 0.1rem 0.1rem 0.7rem;
+      transition: border 0.12s;
+    }
+
+    .soporte-item .link-input:focus-within {
+      border-color: #1d4f73;
+      box-shadow: 0 0 0 2px rgba(26, 76, 120, 0.06);
+    }
+
+    .soporte-item .link-input i {
+      color: #5f7d99;
+      font-size: 0.8rem;
+      margin-right: 0.3rem;
+    }
+
+    .soporte-item .link-input input {
+      border: none;
+      padding: 0.5rem 0.2rem;
+      background: transparent;
+      font-size: 0.85rem;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      border-radius: 0;
+    }
+
+    .soporte-item .link-input input:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .soporte-item .link-input input::placeholder {
+      color: #9db2c7;
+      font-size: 0.8rem;
+    }
+
+    .helper-text {
+      font-size: 0.65rem;
+      color: #5d768e;
+      margin-top: 0.1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .action-row {
+      margin-top: 2.2rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      border-top: 1px solid #e2e9f2;
+      padding-top: 1.8rem;
+    }
+
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 0.6rem 2rem;
+      border-radius: 2px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: #f0f4fa;
+      color: #1d3e5c;
+      border-color: #d0dbe8;
+    }
+
+    .btn-secondary:hover {
+      background: #e3eaf3;
+      border-color: #bccad9;
+    }
+
+    .btn-primary {
+      background: #1d4a6e;
+      color: white;
+      border-color: #1d4a6e;
+      box-shadow: 0 1px 3px rgba(18, 55, 88, 0.06);
+    }
+
+    .btn-primary:hover {
+      background: #133a59;
+      border-color: #133a59;
+      box-shadow: 0 4px 10px rgba(18, 55, 88, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .btn i {
+      font-size: 0.9rem;
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a6886' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      background-size: 0.8rem;
+    }
+
+    /* ----- RESPONSIVE ----- */
+    @media (max-width: 1024px) {
+      .table-header,
+      .table-row {
+        grid-template-columns: 36px 1fr 1fr 0.8fr 1fr 0.8fr 0.7fr 0.7fr;
+        font-size: 0.8rem;
+        padding: 0.6rem 0.8rem;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .table-header {
+        display: none;
+      }
+      .table-row {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 1rem 1rem;
+        border-bottom: 1px solid #e8eef5;
+        gap: 0.4rem 0.8rem;
+        background: #ffffff;
+      }
+      .table-row .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+      }
+      .table-row .cell-name {
+        font-weight: 600;
+        font-size: 1rem;
+        flex: 1 1 100%;
+        order: 0;
+      }
+      .table-row .cell-cedula,
+      .table-row .cell-telefono,
+      .table-row .cell-fecha,
+      .table-row .cell-condicion,
+      .table-row .cell-acciones,
+      .table-row .cell-status {
+        flex: 0 1 auto;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+      .table-row .cell-cedula::before,
+      .table-row .cell-telefono::before,
+      .table-row .cell-fecha::before,
+      .table-row .cell-condicion::before,
+      .table-row .cell-status::before {
+        content: attr(data-label);
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        color: #4b637c;
+        letter-spacing: 0.03em;
+        font-weight: 500;
+      }
+      .table-row .cell-condicion {
+        background: transparent;
+        border: none;
+        padding: 0;
+        border-radius: 0;
+      }
+      .table-row .cell-acciones {
+        margin-left: auto;
+      }
+      .table-footer {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+      .table-footer .pagination {
+        justify-content: center;
+      }
+      .form-card {
+        padding: 1.6rem 1.2rem;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .field-group.full-width {
+        grid-column: 1;
+      }
+      .soporte-grid {
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+      .soporte-item {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+      .form-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-header .subhead {
+        margin-left: 0;
+        width: auto;
+        padding: 0.2rem 1rem;
+      }
+      .action-row {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+      .btn {
+        justify-content: center;
+        padding: 0.7rem 1.5rem;
+      }
+      .modal-overlay {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .top-actions {
+        flex-wrap: wrap;
+      }
+      .top-actions .search-wrapper input {
+        width: 140px;
+      }
+      .metrics {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem 1.2rem;
+      }
+      .form-card {
+        padding: 1.2rem 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div class="brand">
+        <i class="fas fa-users"></i>
+        <h1>Pacientes</h1>
+        <span class="badge">registrados</span>
+      </div>
+      <div class="top-actions">
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Buscar paciente..." oninput="filterPatients()" />
+        </div>
+        <button class="btn-outline" onclick="filterPatients()"><i class="fas fa-sliders-h"></i> Filtrar</button>
+        <button class="btn-primary-sm" id="openModalBtn"><i class="fas fa-plus"></i> Nuevo</button>
+      </div>
+    </div>
+
+    <!-- MÉTRICAS -->
+    <div class="metrics">
+      <div class="metric-item">
+        <i class="fas fa-user-check"></i>
+        <div class="metric-info">
+          <span class="number" id="countActive">0</span>
+          <span class="label">Activos</span>
+        </div>
+      </div>
+      <div class="metric-item">
+        <i class="fas fa-user-clock"></i>
+        <div class="metric-info">
+          <span class="number" id="countPending">0</span>
+          <span class="label">En espera</span>
+        </div>
+      </div>
+      <div class="metric-item">
+        <i class="fas fa-user-slash"></i>
+        <div class="metric-info">
+          <span class="number" id="countArchived">0</span>
+          <span class="label">Archivados</span>
+        </div>
+      </div>
+      <div class="metric-item">
+        <i class="fas fa-calendar-check"></i>
+        <div class="metric-info">
+          <span class="number" id="countTotal">0</span>
+          <span class="label">Total pacientes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA / LISTADO -->
+    <div class="table-wrapper">
+      <div class="table-header">
+        <span></span>
+        <span class="sortable">Nombre <i class="fas fa-sort"></i></span>
+        <span class="sortable">Cédula <i class="fas fa-sort"></i></span>
+        <span>Teléfono</span>
+        <span class="sortable">Fecha nac. <i class="fas fa-sort"></i></span>
+        <span>Condición</span>
+        <span>Estado</span>
+        <span>Acciones</span>
+      </div>
+
+      <div id="patientList"></div>
+
+      <div class="table-footer">
+        <span class="info" id="tableInfo">Mostrando 0 pacientes</span>
+        <div class="pagination" id="paginationControls">
+          <a href="#" data-page="prev">‹</a>
+          <a href="#" class="active" data-page="1">1</a>
+          <a href="#" data-page="next">›</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL (REGISTRO) -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <div class="form-card">
+        <div class="form-header">
+          <i class="fas fa-brain"></i>
+          <h1>Registro · Paciente</h1>
+          <span class="subhead"><i class="fas fa-leaf" style="margin-right: 6px;"></i>Sanadores</span>
+          <button class="btn-close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+
+        <form id="patientForm">
+          <div class="form-grid">
+            <!-- Cédula -->
+            <div class="field-group">
+              <label for="cedula"><i class="fas fa-id-card"></i> Cédula / ID</label>
+              <input type="text" id="cedula" placeholder="Ej. 12345678" required>
+            </div>
+
+            <!-- Nombre -->
+            <div class="field-group">
+              <label for="nombre"><i class="fas fa-user"></i> Nombre y Apellido</label>
+              <input type="text" id="nombre" placeholder="Laura Méndez" required>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="field-group">
+              <label for="telefono"><i class="fas fa-phone-alt"></i> Teléfono</label>
+              <input type="tel" id="telefono" placeholder="+54 9 11 2345 6789">
+            </div>
+
+            <!-- Dirección -->
+            <div class="field-group">
+              <label for="direccion"><i class="fas fa-map-pin"></i> Dirección</label>
+              <input type="text" id="direccion" placeholder="Av. Libertador 1234, CABA">
+            </div>
+
+            <!-- Fecha de nacimiento -->
+            <div class="field-group">
+              <label for="fechaNac"><i class="fas fa-calendar-alt"></i> Fecha de nacimiento</label>
+              <input type="date" id="fechaNac" required>
+            </div>
+
+            <!-- Enfoque / condición -->
+            <div class="field-group">
+              <label for="condicion"><i class="fas fa-circle"></i> Enfoque / condición</label>
+              <select id="condicion">
+                <option value="Consulta general">Consulta general</option>
+                <option value="Ansiedad">Ansiedad / Estrés</option>
+                <option value="Depresión">Depresión / Estado de ánimo</option>
+                <option value="Duelo">Duelo / Pérdida</option>
+                <option value="Autoestima">Autoestima / Desarrollo personal</option>
+                <option value="Vínculos">Vínculos / Relaciones</option>
+                <option value="Holística">Terapia holística</option>
+                <option value="Mindfulness">Mindfulness / Atención plena</option>
+                <option value="Trauma">Trauma / EMDR</option>
+                <option value="Otra">Otra</option>
+              </select>
+            </div>
+
+            <!-- NUEVO CAMPO: Objetivo / Meta -->
+            <div class="field-group full-width">
+              <label for="objetivo"><i class="fas fa-bullseye"></i> Objetivo / Meta terapéutica</label>
+              <input type="text" id="objetivo" placeholder="Ej. Reducir ansiedad, mejorar autoestima, procesar duelo...">
+            </div>
+
+            <!-- SOPORTE: información de respaldo -->
+            <div class="field-group full-width">
+              <div class="soporte-area">
+                <div class="label-section">
+                  <i class="fas fa-folder-tree"></i>
+                  <span>Información de respaldo · propiedad del proceso</span>
+                  <span style="font-weight: 400; font-size: 0.7rem; color: #4d6e8a; margin-left: 0.3rem;">(adjuntar documentos, imágenes o enlaces)</span>
+                </div>
+
+                <div class="soporte-grid">
+                  <!-- Imágenes -->
+                  <div class="soporte-item">
+                    <label for="imagenes"><i class="fas fa-image"></i> Imágenes</label>
+                    <div class="file-input-wrapper">
+                      <i class="fas fa-paperclip" style="color:#4d6e8a; font-size:0.75rem;"></i>
+                      <input type="file" id="imagenes" accept="image/*" multiple>
+                    </div>
+                    <div class="helper-text">JPG, PNG, hasta 5 MB</div>
+                  </div>
+
+                  <!-- Documentos -->
+                  <div class="soporte-item">
+                    <label for="documentos"><i class="fas fa-file-alt"></i> Documentos</label>
+                    <div class="file-input-wrapper">
+                      <i class="fas fa-paperclip" style="color:#4d6e8a; font-size:0.75rem;"></i>
+                      <input type="file" id="documentos" accept=".pdf,.doc,.docx,.txt" multiple>
+                    </div>
+                    <div class="helper-text">PDF, Word, TXT</div>
+                  </div>
+
+                  <!-- Enlaces -->
+                  <div class="soporte-item">
+                    <label for="enlace"><i class="fas fa-link"></i> Enlace / referencia</label>
+                    <div class="link-input">
+                      <i class="fas fa-globe"></i>
+                      <input type="url" id="enlace" placeholder="https://expediente.propio.com">
+                    </div>
+                    <div class="helper-text">Historial, documentos externos</div>
+                  </div>
+                </div>
+
+                <!-- NUEVO CAMPO: Testimonio / observaciones -->
+                <div style="margin-top: 1.5rem; border-top: 1px solid #dce4ef; padding-top: 1.2rem;">
+                  <label for="testimonio" style="font-size: 0.72rem; font-weight: 500; color: #2b4764; letter-spacing: 0.03em; text-transform: uppercase; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem;">
+                    <i class="fas fa-quote-left" style="color: #3b6382;"></i> Testimonio / Observaciones
+                  </label>
+                  <textarea id="testimonio" rows="3" placeholder="Registrar testimonio de familiar, observaciones relevantes, contexto del paciente..." style="width:100%; padding:0.6rem 0.8rem; border:1px solid #ccd7e4; border-radius:2px; font-family:'Inter',sans-serif; font-size:0.9rem; background:#fafcfe; transition:border 0.12s; resize:vertical; min-height:70px;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button type="reset" class="btn btn-secondary"><i class="fas fa-undo-alt"></i> Limpiar</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar sesión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- CONFIGURACIÓN DE LA API -----
+    const API_URL = 'http://localhost:3000/api/pacientes';
+
+    // ----- ESTADO -----
+    let patients = [];
+    let currentPage = 1;
+    const pageSize = 5;
+    let nextId = 1;
+
+    // ----- REFERENCIAS DOM -----
+    const patientListEl = document.getElementById('patientList');
+    const tableInfoEl = document.getElementById('tableInfo');
+    const paginationEl = document.getElementById('paginationControls');
+    const searchInput = document.getElementById('searchInput');
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    const form = document.getElementById('patientForm');
+
+    // ----- FUNCIONES AUXILIARES -----
+    function getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(' ');
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function getStatusLabel(status) {
+      const map = {
+        'Activo': 'status-active',
+        'En espera': 'status-pending',
+        'Archivado': 'status-archived'
+      };
+      return map[status] || 'status-pending';
+    }
+
+    function getDisplayPatients() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      if (!searchTerm) return patients;
+      return patients.filter(p =>
+        p.nombre.toLowerCase().includes(searchTerm) ||
+        p.cedula.includes(searchTerm) ||
+        p.condicion.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // ----- RENDER -----
+    function renderPatients() {
+      const displayList = getDisplayPatients();
+      const start = (currentPage - 1) * pageSize;
+      const pagePatients = displayList.slice(start, start + pageSize);
+      const total = displayList.length;
+
+      if (total === 0) {
+        patientListEl.innerHTML = `
+          <div style="padding: 2.5rem 1.5rem; text-align: center; color: #4b637c; font-size: 0.9rem; border-bottom: 1px solid #e8eef5;">
+            <i class="fas fa-inbox" style="font-size: 2rem; color: #bccad9; display: block; margin-bottom: 0.8rem;"></i>
+            ${patients.length === 0 ? 'No hay pacientes registrados. Haz clic en "Nuevo" para agregar.' : 'No se encontraron pacientes con ese filtro.'}
+          </div>
+        `;
+      } else {
+        let html = '';
+        pagePatients.forEach((p) => {
+          const initials = getInitials(p.nombre);
+          const avatarHtml = p.avatar
+            ? `<img src="${p.avatar}" alt="${p.nombre}" />`
+            : initials;
+
+          html += `
+            <div class="table-row" data-id="${p.id}">
+              <span class="avatar">${avatarHtml}</span>
+              <span class="cell-name">${p.nombre || 'Sin nombre'}</span>
+              <span class="cell-cedula" data-label="Cédula">${p.cedula || '-'}</span>
+              <span class="cell-telefono" data-label="Teléfono">${p.telefono || '-'}</span>
+              <span class="cell-fecha" data-label="Fecha nac.">${formatDate(p.fecha_nac || p.fechaNac)}</span>
+              <span class="cell-condicion" data-label="Condición">${p.condicion || 'Sin especificar'}</span>
+              <span class="cell-status" data-label="Estado"><span class="status-badge ${getStatusLabel(p.estado)}">${p.estado || 'Activo'}</span></span>
+              <span class="cell-acciones">
+                <a href="#" title="Ver" onclick="event.preventDefault(); viewPatient(${p.id});"><i class="fas fa-eye"></i></a>
+                <a href="#" title="Editar" onclick="event.preventDefault(); editPatient(${p.id});"><i class="fas fa-pen"></i></a>
+                <a href="#" title="Eliminar" onclick="event.preventDefault(); deletePatient(${p.id});"><i class="fas fa-trash" style="color:#b14a4a;"></i></a>
+              </span>
+            </div>
+          `;
+        });
+        patientListEl.innerHTML = html;
+      }
+
+      // Actualizar métricas
+      const active = patients.filter(p => p.estado === 'Activo').length;
+      const pending = patients.filter(p => p.estado === 'En espera').length;
+      const archived = patients.filter(p => p.estado === 'Archivado').length;
+      document.getElementById('countActive').textContent = active;
+      document.getElementById('countPending').textContent = pending;
+      document.getElementById('countArchived').textContent = archived;
+      document.getElementById('countTotal').textContent = patients.length;
+
+      // Info y paginación
+      const startShow = total === 0 ? 0 : start + 1;
+      const endShow = Math.min(start + pageSize, total);
+      tableInfoEl.textContent = total === 0 ? 'Mostrando 0 pacientes' : `Mostrando ${startShow}–${endShow} de ${total} pacientes`;
+
+      renderPagination(total);
+    }
+
+    function renderPagination(total) {
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      let html = '';
+      html += `<a href="#" data-page="prev" onclick="event.preventDefault(); goToPage(${currentPage - 1});">‹</a>`;
+      for (let i = 1; i <= totalPages; i++) {
+        html += `<a href="#" data-page="${i}" class="${i === currentPage ? 'active' : ''}" onclick="event.preventDefault(); goToPage(${i});">${i}</a>`;
+      }
+      html += `<a href="#" data-page="next" onclick="event.preventDefault(); goToPage(${currentPage + 1});">›</a>`;
+      paginationEl.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      const displayList = getDisplayPatients();
+      const totalPages = Math.max(1, Math.ceil(displayList.length / pageSize));
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderPatients();
+    }
+
+    function filterPatients() {
+      currentPage = 1;
+      renderPatients();
+    }
+
+    // ----- FUNCIONES DE API -----
+    async function fetchPatients() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Error al obtener pacientes');
+        patients = await response.json();
+        // Actualizar nextId
+        if (patients.length > 0) {
+          nextId = Math.max(...patients.map(p => p.id)) + 1;
+        }
+        renderPatients();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al cargar los pacientes desde el servidor. Asegúrate de que el backend esté corriendo.');
+        // Cargar datos de ejemplo si falla la conexión
+        loadDemoData();
+      }
+    }
+
+    async function createPatient(patientData) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patientData)
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al crear paciente');
+        }
+        
+        const result = await response.json();
+        alert(`Paciente registrado exitosamente con ID: ${result.id}`);
+        await fetchPatients(); // Recargar la lista
+        return true;
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+        return false;
+      }
+    }
+
+    async function updatePatient(id, patientData) {
+      try {
+        const response = await fetch(`${API_URL}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(patientData)
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al actualizar paciente');
+        }
+        
+        alert('Paciente actualizado exitosamente');
+        await fetchPatients();
+        return true;
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+        return false;
+      }
+    }
+
+    async function deletePatientFromDB(id) {
+      if (!confirm('¿Eliminar este paciente?')) return false;
+      
+      try {
+        const response = await fetch(`${API_URL}/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Error al eliminar paciente');
+        }
+        
+        alert('Paciente eliminado exitosamente');
+        await fetchPatients();
+        return true;
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message);
+        return false;
+      }
+    }
+
+    // ----- CRUD -----
+    function addPatientFromForm() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const cedula = document.getElementById('cedula').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const fechaNac = document.getElementById('fechaNac').value;
+      const condicion = document.getElementById('condicion').value;
+      const objetivo = document.getElementById('objetivo').value.trim();
+      const testimonio = document.getElementById('testimonio').value.trim();
+      const enlace = document.getElementById('enlace').value.trim();
+
+      if (!nombre || !cedula || !fechaNac) {
+        alert('Por favor, completa los campos obligatorios: Nombre, Cédula y Fecha de nacimiento.');
+        return;
+      }
+
+      // Validar cédula única (en el cliente)
+      if (patients.some(p => p.cedula === cedula)) {
+        alert('Ya existe un paciente con esta cédula.');
+        return;
+      }
+
+      const fileInput = document.getElementById('imagenes');
+      let avatarUrl = null;
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith('image/')) {
+          avatarUrl = URL.createObjectURL(file);
+        }
+      }
+
+      const patientData = {
+        nombre,
+        cedula,
+        telefono: telefono || null,
+        direccion: direccion || null,
+        fecha_nac: fechaNac,
+        condicion,
+        objetivo: objetivo || null,
+        testimonio: testimonio || null,
+        estado: 'Activo',
+        enlace: enlace || null,
+        avatar: avatarUrl
+      };
+
+      createPatient(patientData).then(success => {
+        if (success) {
+          form.reset();
+          closeModal();
+        }
+      });
+    }
+
+    function deletePatient(id) {
+      deletePatientFromDB(id);
+    }
+
+    function viewPatient(id) {
+      const patient = patients.find(p => p.id === id);
+      if (!patient) return;
+      alert(
+        `ID: ${patient.id}\n` +
+        `Nombre: ${patient.nombre}\n` +
+        `Cédula: ${patient.cedula}\n` +
+        `Teléfono: ${patient.telefono}\n` +
+        `Dirección: ${patient.direccion}\n` +
+        `Fecha nac.: ${formatDate(patient.fecha_nac || patient.fechaNac)}\n` +
+        `Condición: ${patient.condicion}\n` +
+        `Objetivo: ${patient.objetivo || 'No especificado'}\n` +
+        `Testimonio: ${patient.testimonio || 'No registrado'}\n` +
+        `Estado: ${patient.estado}\n` +
+        `Enlace: ${patient.enlace || 'Ninguno'}`
+      );
+    }
+
+    function editPatient(id) {
+      const patient = patients.find(p => p.id === id);
+      if (!patient) return;
+
+      // Cargar datos en el formulario
+      document.getElementById('nombre').value = patient.nombre;
+      document.getElementById('cedula').value = patient.cedula;
+      document.getElementById('telefono').value = patient.telefono === '-' || patient.telefono === null ? '' : patient.telefono;
+      document.getElementById('direccion').value = patient.direccion === '-' || patient.direccion === null ? '' : patient.direccion;
+      document.getElementById('fechaNac').value = patient.fecha_nac || patient.fechaNac;
+      document.getElementById('condicion').value = patient.condicion;
+      document.getElementById('objetivo').value = patient.objetivo || '';
+      document.getElementById('testimonio').value = patient.testimonio || '';
+      document.getElementById('enlace').value = patient.enlace || '';
+
+      // Cambiar el comportamiento del submit para actualizar
+      form.onsubmit = function(e) {
+        e.preventDefault();
+        const data = getFormData();
+        updatePatient(id, data).then(success => {
+          if (success) {
+            form.reset();
+            closeModal();
+            form.onsubmit = defaultSubmit;
+          }
+        });
+      };
+      openModal();
+      alert('Paciente cargado para edición. Completa los cambios y guarda.');
+    }
+
+    function getFormData() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const cedula = document.getElementById('cedula').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const fechaNac = document.getElementById('fechaNac').value;
+      const condicion = document.getElementById('condicion').value;
+      const objetivo = document.getElementById('objetivo').value.trim();
+      const testimonio = document.getElementById('testimonio').value.trim();
+      const enlace = document.getElementById('enlace').value.trim();
+
+      const fileInput = document.getElementById('imagenes');
+      let avatarUrl = null;
+      if (fileInput.files && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith('image/')) {
+          avatarUrl = URL.createObjectURL(file);
+        }
+      }
+
+      return {
+        nombre,
+        cedula,
+        telefono: telefono || null,
+        direccion: direccion || null,
+        fecha_nac: fechaNac,
+        condicion,
+        objetivo: objetivo || null,
+        testimonio: testimonio || null,
+        estado: 'Activo',
+        enlace: enlace || null,
+        avatar: avatarUrl
+      };
+    }
+
+    function defaultSubmit(e) {
+      e.preventDefault();
+      addPatientFromForm();
+    }
+
+    // ----- MODAL -----
+    function openModal() {
+      modalOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+      form.reset();
+      form.onsubmit = defaultSubmit;
+    }
+
+    openModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    form.onsubmit = defaultSubmit;
+
+    // ----- DATOS DE EJEMPLO (fallback) -----
+    function loadDemoData() {
+      patients = [
+        { id: 1, nombre: 'María González', cedula: '28.345.678', telefono: '+54 11 2345-6789', direccion: 'Av. Corrientes 1234, CABA', fecha_nac: '1985-04-12', condicion: 'Ansiedad', objetivo: 'Reducir ataques de pánico', testimonio: 'Familiar refiere que ha mejorado con la medicación', estado: 'Activo', avatar: null, enlace: '' },
+        { id: 2, nombre: 'Juan Ríos', cedula: '32.112.456', telefono: '+54 11 3987-1234', direccion: 'Calle Florida 567, CABA', fecha_nac: '1992-09-22', condicion: 'Duelo', objetivo: 'Procesar pérdida familiar', testimonio: 'Hermana comenta que está más retraído', estado: 'Activo', avatar: null, enlace: '' },
+        { id: 3, nombre: 'Carla López', cedula: '27.654.321', telefono: '+54 11 4789-0123', direccion: 'Av. Santa Fe 890, CABA', fecha_nac: '1978-11-03', condicion: 'Holística', objetivo: 'Equilibrio energético', testimonio: 'Refiere mejoría en síntomas físicos', estado: 'En espera', avatar: null, enlace: '' },
+        { id: 4, nombre: 'Diego Pérez', cedula: '30.987.654', telefono: '+54 11 5678-9012', direccion: 'Calle Uruguay 345, CABA', fecha_nac: '2001-07-19', condicion: 'Autoestima', objetivo: 'Mejorar autoconfianza', testimonio: 'Madre nota cambios positivos', estado: 'Archivado', avatar: null, enlace: '' },
+        { id: 5, nombre: 'Sofía Fernández', cedula: '26.543.210', telefono: '+54 11 3456-7890', direccion: 'Av. Belgrano 234, CABA', fecha_nac: '1995-03-08', condicion: 'Mindfulness', objetivo: 'Reducir estrés laboral', testimonio: 'Compañeros notan mejoría', estado: 'Activo', avatar: null, enlace: '' },
+        { id: 6, nombre: 'Andrés Morales', cedula: '34.221.789', telefono: '+54 11 6543-2109', direccion: 'Calle Salta 789, CABA', fecha_nac: '1988-12-27', condicion: 'Trauma', objetivo: 'Procesar evento traumático', testimonio: 'Pareja refiere pesadillas recurrentes', estado: 'En espera', avatar: null, enlace: '' }
+      ];
+      nextId = 7;
+      renderPatients();
+      alert('⚠️ Usando datos de ejemplo. No se pudo conectar con el servidor.');
+    }
+
+    // ----- INICIALIZAR -----
+    // Intentar conectar con el backend
+    fetchPatients();
+  </script>
+
+</body>
+</html>
