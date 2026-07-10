@@ -1,196 +1,176 @@
-// api/pacientes.js
-const { Pool } = require('pg');
-
-// Configuración de la conexión a PostgreSQL
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT || '5432'),
-    ssl: {
-        rejectUnauthorized: false // Necesario para la mayoría de servicios en la nube
-    }
-});
+// api/pacientes.js - Con Supabase REST API
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 module.exports = async (req, res) => {
-    // Configurar CORS
+    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, apikey, Authorization, Prefer');
 
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
     }
 
+    // Verificar variables de entorno
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        return res.status(500).json({
+            error: 'Variables de entorno faltantes',
+            details: 'Configura SUPABASE_URL y SUPABASE_ANON_KEY en Vercel',
+            received: {
+                SUPABASE_URL: SUPABASE_URL ? '✅' : '❌',
+                SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? '✅' : '❌'
+            }
+        });
+    }
+
     const { method } = req;
     const urlParts = req.url.split('/');
     const id = urlParts[urlParts.length - 1];
 
-    try {
-        // GET - Obtener todos los pacientes o uno específico
-        if (method === 'GET') {
-            if (id && !isNaN(id)) {
-                // Obtener un paciente específico
-                const result = await pool.query(
-                    'SELECT * FROM pacientes WHERE id = $1',
-                    [parseInt(id)]
-                );
-                if (result.rows.length === 0) {
-                    res.status(404).json({ error: 'Paciente no encontrado' });
-                    return;
-                }
-                res.status(200).json(result.rows[0]);
-            } else {
-                // Obtener todos los pacientes
-                const result = await pool.query(
-                    'SELECT * FROM pacientes ORDER BY id'
-                );
-                res.status(200).json(result.rows);
+    // Función helper para hacer requests a Supabase
+    async function supabaseFetch(url, options = {}) {
+        const defaultHeaders = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+        };
+
+        const response = await fetch(`${SUPABASE_URL}${url}`, {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers
             }
-            return;
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText}`);
         }
 
-        // POST - Crear nuevo paciente
+        return response;
+    }
+
+    try {
+        // GET - Obtener pacientes
+        if (method === 'GET') {
+            let url = '/rest/v1/pacientes?select=*&order=id.asc';
+            
+            // Si hay un ID, obtener un paciente específico
+            if (id && !isNaN(id) && id !== 'test') {
+                url = `/rest/v1/pacientes?id=eq.${id}&select=*`;
+                const response = await supabaseFetch(url);
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    return res.status(404).json({ error: 'Paciente no encontrado' });
+                }
+                return res.status(200).json(data[0]);
+            } else if (id !== 'test') {
+                const response = await supabaseFetch(url);
+                const data = await response.json();
+                return res.status(200).json(data);
+            }
+        }
+
+        // POST - Crear paciente
         if (method === 'POST') {
             const { nombre, cedula, telefono, direccion, fecha_nac, condicion, objetivo, testimonio, estado, enlace, avatar } = req.body;
 
             if (!nombre || !cedula || !fecha_nac) {
-                res.status(400).json({ error: 'Nombre, Cédula y Fecha de nacimiento son obligatorios' });
-                return;
+                return res.status(400).json({ error: 'Nombre, Cédula y Fecha de nacimiento son obligatorios' });
             }
 
-            // Verificar cédula duplicada
-            const existing = await pool.query(
-                'SELECT id FROM pacientes WHERE cedula = $1',
-                [cedula]
-            );
-            if (existing.rows.length > 0) {
-                res.status(409).json({ error: 'Ya existe un paciente con esta cédula' });
-                return;
-            }
+            const newPatient = {
+                nombre,
+                cedula,
+                telefono: telefono || null,
+                direccion: direccion || null,
+                fecha_nac,
+                condicion: condicion || 'Consulta general',
+                objetivo: objetivo || null,
+                testimonio: testimonio || null,
+                estado: estado || 'Activo',
+                enlace: enlace || null,
+                avatar: avatar || null
+            };
 
-            const result = await pool.query(
-                `INSERT INTO pacientes 
-                 (nombre, cedula, telefono, direccion, fecha_nac, condicion, objetivo, testimonio, estado, enlace, avatar) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-                 RETURNING id`,
-                [
-                    nombre,
-                    cedula,
-                    telefono || null,
-                    direccion || null,
-                    fecha_nac,
-                    condicion || 'Consulta general',
-                    objetivo || null,
-                    testimonio || null,
-                    estado || 'Activo',
-                    enlace || null,
-                    avatar || null
-                ]
-            );
-
-            res.status(201).json({ 
-                id: result.rows[0].id, 
-                message: 'Paciente registrado exitosamente' 
+            const response = await supabaseFetch('/rest/v1/pacientes', {
+                method: 'POST',
+                headers: {
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(newPatient)
             });
-            return;
+
+            const data = await response.json();
+            
+            return res.status(201).json({
+                id: data[0]?.id || data?.id,
+                message: 'Paciente registrado exitosamente'
+            });
         }
 
         // PUT - Actualizar paciente
         if (method === 'PUT') {
             if (!id || isNaN(id)) {
-                res.status(400).json({ error: 'ID inválido' });
-                return;
+                return res.status(400).json({ error: 'ID inválido' });
             }
 
             const { nombre, cedula, telefono, direccion, fecha_nac, condicion, objetivo, testimonio, estado, enlace, avatar } = req.body;
 
-            // Verificar si el paciente existe
-            const existing = await pool.query(
-                'SELECT id FROM pacientes WHERE id = $1',
-                [parseInt(id)]
-            );
-            if (existing.rows.length === 0) {
-                res.status(404).json({ error: 'Paciente no encontrado' });
-                return;
+            const updateData = {};
+            if (nombre !== undefined) updateData.nombre = nombre;
+            if (cedula !== undefined) updateData.cedula = cedula;
+            if (telefono !== undefined) updateData.telefono = telefono || null;
+            if (direccion !== undefined) updateData.direccion = direccion || null;
+            if (fecha_nac !== undefined) updateData.fecha_nac = fecha_nac;
+            if (condicion !== undefined) updateData.condicion = condicion;
+            if (objetivo !== undefined) updateData.objetivo = objetivo || null;
+            if (testimonio !== undefined) updateData.testimonio = testimonio || null;
+            if (estado !== undefined) updateData.estado = estado;
+            if (enlace !== undefined) updateData.enlace = enlace || null;
+            if (avatar !== undefined) updateData.avatar = avatar || null;
+
+            const response = await supabaseFetch(`/rest/v1/pacientes?id=eq.${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const data = await response.json();
+            
+            if (data.length === 0) {
+                return res.status(404).json({ error: 'Paciente no encontrado' });
             }
 
-            // Si se cambia la cédula, verificar que no exista en otro paciente
-            if (cedula) {
-                const cedulaCheck = await pool.query(
-                    'SELECT id FROM pacientes WHERE cedula = $1 AND id != $2',
-                    [cedula, parseInt(id)]
-                );
-                if (cedulaCheck.rows.length > 0) {
-                    res.status(409).json({ error: 'Ya existe otro paciente con esta cédula' });
-                    return;
-                }
-            }
-
-            await pool.query(
-                `UPDATE pacientes SET 
-                 nombre = COALESCE($1, nombre),
-                 cedula = COALESCE($2, cedula),
-                 telefono = $3,
-                 direccion = $4,
-                 fecha_nac = COALESCE($5, fecha_nac),
-                 condicion = $6,
-                 objetivo = $7,
-                 testimonio = $8,
-                 estado = $9,
-                 enlace = $10,
-                 avatar = $11
-                 WHERE id = $12`,
-                [
-                    nombre || null,
-                    cedula || null,
-                    telefono || null,
-                    direccion || null,
-                    fecha_nac || null,
-                    condicion || 'Consulta general',
-                    objetivo || null,
-                    testimonio || null,
-                    estado || 'Activo',
-                    enlace || null,
-                    avatar || null,
-                    parseInt(id)
-                ]
-            );
-
-            res.status(200).json({ message: 'Paciente actualizado exitosamente' });
-            return;
+            return res.status(200).json({ message: 'Paciente actualizado exitosamente' });
         }
 
         // DELETE - Eliminar paciente
         if (method === 'DELETE') {
             if (!id || isNaN(id)) {
-                res.status(400).json({ error: 'ID inválido' });
-                return;
+                return res.status(400).json({ error: 'ID inválido' });
             }
 
-            const result = await pool.query(
-                'DELETE FROM pacientes WHERE id = $1 RETURNING id',
-                [parseInt(id)]
-            );
-            if (result.rows.length === 0) {
-                res.status(404).json({ error: 'Paciente no encontrado' });
-                return;
-            }
+            await supabaseFetch(`/rest/v1/pacientes?id=eq.${id}`, {
+                method: 'DELETE'
+            });
 
-            res.status(200).json({ message: 'Paciente eliminado exitosamente' });
-            return;
+            return res.status(200).json({ message: 'Paciente eliminado exitosamente' });
         }
 
-        // Método no permitido
-        res.status(405).json({ error: 'Método no permitido' });
+        return res.status(405).json({ error: 'Método no permitido' });
 
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ 
-            error: 'Error en el servidor', 
-            details: error.message 
+        console.error('❌ Error:', error);
+        return res.status(500).json({
+            error: 'Error en el servidor',
+            details: error.message
         });
     }
 };
