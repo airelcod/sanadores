@@ -1155,7 +1155,10 @@
 
   <script>
     // ----- CONFIGURACIÓN DE LA API -----
-    const API_URL = 'http://localhost:3000/api/pacientes';
+    // Cambia esta URL por la URL de tu sitio en Vercel
+    const API_URL = '/api/pacientes';
+    // Si estás en desarrollo local y quieres probar con el backend local:
+    // const API_URL = 'http://localhost:3000/api/pacientes';
 
     // ----- ESTADO -----
     let patients = [];
@@ -1294,8 +1297,12 @@
     // ----- FUNCIONES DE API -----
     async function fetchPatients() {
       try {
+        console.log('Fetching patients from:', API_URL);
         const response = await fetch(API_URL);
-        if (!response.ok) throw new Error('Error al obtener pacientes');
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
         patients = await response.json();
         // Actualizar nextId
         if (patients.length > 0) {
@@ -1303,10 +1310,10 @@
         }
         renderPatients();
       } catch (error) {
-        console.error('Error:', error);
-        alert('Error al cargar los pacientes desde el servidor. Asegúrate de que el backend esté corriendo.');
+        console.error('Error al obtener pacientes:', error);
         // Cargar datos de ejemplo si falla la conexión
         loadDemoData();
+        alert('⚠️ No se pudo conectar con el servidor. Usando datos de ejemplo.\n\nDetalles: ' + error.message);
       }
     }
 
@@ -1324,12 +1331,12 @@
         }
         
         const result = await response.json();
-        alert(`Paciente registrado exitosamente con ID: ${result.id}`);
+        alert(`✅ Paciente registrado exitosamente con ID: ${result.id}`);
         await fetchPatients(); // Recargar la lista
         return true;
       } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
+        console.error('Error al crear paciente:', error);
+        alert('❌ Error al crear paciente: ' + error.message);
         return false;
       }
     }
@@ -1347,12 +1354,12 @@
           throw new Error(error.error || 'Error al actualizar paciente');
         }
         
-        alert('Paciente actualizado exitosamente');
+        alert('✅ Paciente actualizado exitosamente');
         await fetchPatients();
         return true;
       } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
+        console.error('Error al actualizar paciente:', error);
+        alert('❌ Error al actualizar paciente: ' + error.message);
         return false;
       }
     }
@@ -1370,12 +1377,12 @@
           throw new Error(error.error || 'Error al eliminar paciente');
         }
         
-        alert('Paciente eliminado exitosamente');
+        alert('✅ Paciente eliminado exitosamente');
         await fetchPatients();
         return true;
       } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
+        console.error('Error al eliminar paciente:', error);
+        alert('❌ Error al eliminar paciente: ' + error.message);
         return false;
       }
     }
@@ -1442,11 +1449,12 @@
       const patient = patients.find(p => p.id === id);
       if (!patient) return;
       alert(
+        `📋 Información del Paciente\n\n` +
         `ID: ${patient.id}\n` +
         `Nombre: ${patient.nombre}\n` +
         `Cédula: ${patient.cedula}\n` +
-        `Teléfono: ${patient.telefono}\n` +
-        `Dirección: ${patient.direccion}\n` +
+        `Teléfono: ${patient.telefono || '-'}\n` +
+        `Dirección: ${patient.direccion || '-'}\n` +
         `Fecha nac.: ${formatDate(patient.fecha_nac || patient.fechaNac)}\n` +
         `Condición: ${patient.condicion}\n` +
         `Objetivo: ${patient.objetivo || 'No especificado'}\n` +
@@ -1484,7 +1492,6 @@
         });
       };
       openModal();
-      alert('Paciente cargado para edición. Completa los cambios y guarda.');
     }
 
     function getFormData() {
@@ -1564,12 +1571,14 @@
       ];
       nextId = 7;
       renderPatients();
-      alert('⚠️ Usando datos de ejemplo. No se pudo conectar con el servidor.');
     }
 
     // ----- INICIALIZAR -----
     // Intentar conectar con el backend
     fetchPatients();
+
+    // Mostrar en consola la URL de la API para debug
+    console.log('📡 API URL:', API_URL);
   </script>
 
 </body>
